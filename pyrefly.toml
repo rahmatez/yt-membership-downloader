@@ -1,0 +1,4 @@
+# Point Pyrefly (and the IDE) at the project's virtualenv so imports like
+# flask / yt_dlp resolve from venv/ instead of the system Python.
+python-interpreter = "venv/bin/python"
+search-path = ["."]

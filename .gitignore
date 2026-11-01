@@ -1,0 +1,16 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# App runtime data (jangan di-commit — berisi file & cookie pribadi)
+downloads/
+cookies/
+cookies.txt
+*_cookies.txt
+
+# Server PO Token pihak ketiga (clone & build terpisah — lihat README)
+pot-provider/
+
+# OS
+.DS_Store

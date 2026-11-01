@@ -1,0 +1,4 @@
+Flask==3.1.0
+yt-dlp>=2025.1.1
+# Penyedia PO Token untuk video membership/SABR (butuh server bgutil + deno).
+bgutil-ytdlp-pot-provider>=2.0.0

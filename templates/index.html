@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#f2efe9" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0a0a0c" media="(prefers-color-scheme: dark)" />
+<title>YouTube Membership Downloader</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+<div class="bg"></div>
+
+<div class="wrap">
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="badge">▶</div>
+    <h1>Membership Downloader</h1>
+    <p>Unduh video YouTube & membership kamu — rapi, lokal, lewat yt-dlp.</p>
+  </header>
+
+  <!-- 1 · Cookies -->
+  <section class="card reveal">
+    <div class="card-head">
+      <span class="step">1</span>
+      <h2>Cookies untuk membership</h2>
+    </div>
+
+    <div class="status-pill">
+      <span id="cookieDot" class="dot {{ 'on' if has_cookie_file else 'off' }}"></span>
+      <span id="cookieText">
+        {{ 'cookies.txt tersimpan' if has_cookie_file else 'Belum ada cookies.txt' }}
+      </span>
+    </div>
+
+    <div class="field">
+      <label>Sumber cookie</label>
+      <select id="cookieSource">
+        <option value="none">Tanpa cookie (video publik)</option>
+        <option value="file" {{ 'selected' if has_cookie_file else '' }}>File cookies.txt (upload)</option>
+        <option value="browser">Ambil dari browser</option>
+      </select>
+    </div>
+
+    <div id="fileBlock" class="field hidden">
+      <label>Upload cookies.txt (format Netscape)</label>
+      <div class="inline">
+        <div class="grow"><input type="file" id="cookieFile" accept=".txt" /></div>
+        <button class="ghost" id="uploadBtn" type="button">Simpan</button>
+      </div>
+      <p class="hint">
+        Export pakai ekstensi <em>Get cookies.txt LOCALLY</em> saat kamu login & punya membership.
+      </p>
+    </div>
+
+    <div id="browserBlock" class="field hidden">
+      <label>Browser</label>
+      <select id="browser">
+        {% for b in browsers %}<option value="{{ b }}">{{ b }}</option>{% endfor %}
+      </select>
+      <p class="hint">yt-dlp membaca cookie langsung dari browser. Tutup browser dulu jika muncul error <code>database locked</code>.</p>
+    </div>
+  </section>
+
+  <!-- 2 · Video -->
+  <section class="card reveal">
+    <div class="card-head">
+      <span class="step">2</span>
+      <h2>Video atau playlist</h2>
+    </div>
+
+    <div class="field">
+      <label>URL YouTube</label>
+      <div class="inline">
+        <div class="grow"><input type="url" id="url" placeholder="https://www.youtube.com/watch?v=… atau …/playlist?list=…" /></div>
+        <button class="ghost" id="fetchBtn" type="button">Cek</button>
+      </div>
+    </div>
+
+    <div id="infoMsg"></div>
+    <div id="meta" class="meta hidden"></div>
+  </section>
+
+  <!-- 3 · Format -->
+  <section class="card reveal">
+    <div class="card-head">
+      <span class="step">3</span>
+      <h2>Format & kualitas</h2>
+    </div>
+
+    <div class="field">
+      <label>Tipe unduhan</label>
+      <div class="seg" id="modeSeg">
+        <button data-mode="video" class="active" type="button">🎬 Video + Audio</button>
+        <button data-mode="audio" type="button">🎵 Audio saja</button>
+      </div>
+    </div>
+
+    <div id="videoOpts" class="field">
+      <label>Kualitas video</label>
+      <select id="height">
+        <option value="best">Terbaik yang tersedia</option>
+      </select>
+    </div>
+
+    <div id="playlistOpts" class="field hidden">
+      <label>Item playlist (opsional)</label>
+      <input type="text" id="playlistItems" placeholder="contoh: 1-5,8,10 — kosong untuk semua" />
+      <p class="hint">Rentang & nomor dipisah koma. Hasil playlist dikemas jadi satu <code>.zip</code>.</p>
+    </div>
+
+    <div id="audioOpts" class="field hidden">
+      <label>Format audio</label>
+      <select id="audioFormat">
+        <option value="mp3">MP3</option>
+        <option value="m4a">M4A</option>
+        <option value="opus">Opus</option>
+        <option value="wav">WAV</option>
+      </select>
+    </div>
+
+    <div class="field" style="margin-top:22px;">
+      <button id="downloadBtn" class="btn-lg" type="button">⬇ Download</button>
+    </div>
+
+    <div id="progressBlock" class="field hidden">
+      <div id="progText" class="hint"></div>
+      <div class="bar"><div id="progFill"></div></div>
+      <div id="result"></div>
+    </div>
+  </section>
+
+  <p class="footnote">
+    Butuh <code>ffmpeg</code> terpasang. Hanya unduh konten yang kamu punya hak aksesnya.
+  </p>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
