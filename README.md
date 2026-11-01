@@ -2,9 +2,9 @@
 
 # ▶ YouTube Membership Downloader
 
-**Web UI lokal untuk mengunduh video YouTube — termasuk video *membership* / members-only yang kamu punya aksesnya — dengan [yt-dlp](https://github.com/yt-dlp/yt-dlp).**
+**A local web UI for downloading YouTube videos — including *membership* / members-only videos you have access to — powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp).**
 
-Pilih kualitas video, ekstrak audio, unduh playlist, pakai cookie membership. Jalan sepenuhnya di komputermu (localhost), tampilan ala Apple.
+Pick video quality, extract audio, download playlists, use membership cookies. Runs entirely on your own machine (localhost), with an Apple-style interface.
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
@@ -12,48 +12,50 @@ Pilih kualitas video, ekstrak audio, unduh playlist, pakai cookie membership. Ja
 ![powered by yt-dlp](https://img.shields.io/badge/powered%20by-yt--dlp-red)
 ![platform](https://img.shields.io/badge/platform-local%20%2F%20localhost-lightgrey)
 
+**English** · [Bahasa Indonesia](README.id.md)
+
 </div>
 
 > [!WARNING]
-> Gunakan **hanya** untuk konten yang kamu punya hak aksesnya (mis. membership yang kamu bayar sendiri). Patuhi Terms of Service YouTube dan hukum yang berlaku. Proyek ini untuk keperluan pribadi/edukasi.
+> Use this **only** for content you have the right to access (e.g. a membership you pay for yourself). Follow YouTube's Terms of Service and applicable laws. This project is for personal/educational use.
 
 ---
 
-## ✨ Fitur
+## ✨ Features
 
-- 🔎 **Cek info video** — judul, thumbnail, durasi, dan daftar kualitas yang benar-benar tersedia.
-- 🎬 **Pilih kualitas video** — Terbaik / 2160p (4K) / 1440p / 1080p / 720p / 480p / 360p.
-- 🎵 **Audio saja** — MP3 / M4A / Opus / WAV.
-- 📃 **Playlist** — deteksi otomatis, pilih item tertentu (mis. `1-5,8`) atau semua; hasil dikemas jadi satu `.zip`.
-- 🍪 **Cookie membership** — upload `cookies.txt` (format Netscape) atau ambil langsung dari browser.
-- 📊 **Progress real-time** + nama file otomatis **sesuai judul video**.
-- 🧹 **Auto-bersih** — salinan di server dihapus otomatis setelah file selesai diunduh ke komputer (tanpa duplikat).
-- 🌗 **UI modern** — frosted glass, mode gelap otomatis, responsif.
+- 🔎 **Inspect video info** — title, thumbnail, duration, and the list of actually-available qualities.
+- 🎬 **Choose video quality** — Best / 2160p (4K) / 1440p / 1080p / 720p / 480p / 360p.
+- 🎵 **Audio only** — MP3 / M4A / Opus / WAV.
+- 📃 **Playlist** — auto-detected, pick specific items (e.g. `1-5,8`) or all; the result is bundled into a single `.zip`.
+- 🍪 **Membership cookies** — upload a `cookies.txt` (Netscape format) or read them straight from your browser.
+- 📊 **Real-time progress** + output filename **matches the video title**.
+- 🧹 **Auto-cleanup** — the server copy is deleted automatically once the file finishes downloading to your computer (no duplicates).
+- 🌗 **Modern UI** — frosted glass, automatic dark mode, responsive.
 
 ---
 
-## 🧩 Prasyarat
+## 🧩 Requirements
 
-| Kebutuhan | Untuk apa | Wajib? |
+| Requirement | Used for | Required? |
 |---|---|---|
-| **Python 3.9+** | menjalankan aplikasi | ✅ Wajib |
-| **ffmpeg** | menggabungkan video+audio & konversi audio | ✅ Wajib |
-| **Node.js** | menjalankan server PO Token (video membership/SABR) | ⚠️ Untuk membership |
-| **deno** | memecahkan "nsig challenge" YouTube | ⚠️ Untuk membership |
-| **Docker** | alternatif server PO Token (pengganti Node) | ⭕ Opsional |
+| **Python 3.9+** | running the app | ✅ Required |
+| **ffmpeg** | merging video+audio & converting audio | ✅ Required |
+| **Node.js** | running the PO Token server (membership/SABR videos) | ⚠️ For membership |
+| **deno** | solving YouTube's "nsig challenge" | ⚠️ For membership |
+| **Docker** | alternative PO Token server (instead of Node) | ⭕ Optional |
 
-**Install prasyarat (macOS / Homebrew):**
+**Install prerequisites (macOS / Homebrew):**
 ```bash
 brew install python ffmpeg node deno
 ```
 - Ubuntu/Debian: `sudo apt install python3 python3-venv ffmpeg nodejs` + [install deno](https://docs.deno.com/runtime/getting_started/installation/)
-- Windows: install Python, ffmpeg, Node, deno dari situs resminya dan pastikan masuk PATH.
+- Windows: install Python, ffmpeg, Node, and deno from their official sites and make sure they're on your PATH.
 
-> Video **biasa (non-membership)** cukup butuh Python + ffmpeg. Node & deno hanya diperlukan untuk video membership yang kena proteksi SABR YouTube.
+> **Regular (non-membership) videos** only need Python + ffmpeg. Node & deno are required only for membership videos protected by YouTube's SABR streaming.
 
 ---
 
-## 📦 Instalasi
+## 📦 Installation
 
 ```bash
 cd yt-membership
@@ -62,41 +64,41 @@ python3 -m venv venv
 ```
 
 > [!TIP]
-> Jika shell-mu punya alias `python` (mis. dari ServBay/Homebrew), aktivasi `source venv/bin/activate` bisa "terbajak". **Paling aman jalankan pakai path langsung: `./venv/bin/python`** (lihat Troubleshooting).
+> If your shell has a `python` alias (e.g. from ServBay/Homebrew), `source venv/bin/activate` can get "hijacked". **The safest option is to run with the explicit path: `./venv/bin/python`** (see Troubleshooting).
 
 ---
 
-## 🚀 Menjalankan
+## 🚀 Running
 
-### A. Video biasa (non-membership) — cukup 1 terminal
+### A. Regular (non-membership) videos — just 1 terminal
 
 ```bash
 cd yt-membership
 ./venv/bin/python app.py
 ```
-Buka **http://127.0.0.1:5050**
+Open **http://127.0.0.1:5050**
 
-### B. Video membership — butuh 2 terminal
+### B. Membership videos — needs 2 terminals
 
-**Terminal 1 — Server PO Token** (biarkan terbuka selama dipakai):
+**Terminal 1 — PO Token server** (keep it open while in use):
 ```bash
 cd yt-membership/pot-provider/server
 node build/main.js
 ```
-Tunggu sampai muncul: `Started POT server (v2.0.2) on ... 127.0.0.1:4416`
-➡ Jangan ditutup. Proses ini memang tidak kembali ke prompt — itu normal.
+Wait until you see: `Started POT server (v2.0.2) on ... 127.0.0.1:4416`
+➡ Don't close it. This process intentionally doesn't return to the prompt — that's normal.
 
-**Terminal 2 — Aplikasi Flask:**
+**Terminal 2 — the Flask app:**
 ```bash
 cd yt-membership
 ./venv/bin/python app.py
 ```
-Buka **http://127.0.0.1:5050**
+Open **http://127.0.0.1:5050**
 
-> Port default **5050** (bukan 5000) karena di macOS modern port 5000 dipakai AirPlay Receiver. Ganti bila perlu: `PORT=8000 ./venv/bin/python app.py`
+> Default port is **5050** (not 5000) because modern macOS uses port 5000 for the AirPlay Receiver. Change it if needed: `PORT=8000 ./venv/bin/python app.py`
 
-#### Setup server PO Token pertama kali (hanya sekali)
-Folder `pot-provider/` tidak ikut di repo (pihak ketiga). Clone & build dulu:
+#### First-time PO Token server setup (once)
+The `pot-provider/` folder is **not** included in the repo (third-party). Clone & build it:
 ```bash
 cd yt-membership
 git clone --depth 1 --branch 2.0.2 \
@@ -105,106 +107,112 @@ cd pot-provider/server
 npm install
 npx tsc
 ```
-Lalu jalankan `node build/main.js` seperti di atas.
+Then run `node build/main.js` as shown above.
 
 <details>
-<summary>Alternatif: pakai Docker (pengganti Node)</summary>
+<summary>Alternative: use Docker (instead of Node)</summary>
 
 ```bash
-open -a Docker   # tunggu Docker Desktop running
+open -a Docker   # wait for Docker Desktop to be running
 docker run --name bgutil-provider -d --restart unless-stopped -p 4416:4416 brainicism/bgutil-ytdlp-pot-provider
 ```
 </details>
 
 ---
 
-## 📖 Langkah pemakaian (di browser)
+## 📖 How to use (in the browser)
 
-1. **Buka** http://127.0.0.1:5050
+1. **Open** http://127.0.0.1:5050
 
-2. **(Khusus membership) Pasang cookie** — bagian **1 · Cookies**:
-   - **Sumber cookie → File cookies.txt (upload)** → pilih file → klik **Simpan**.
-   - Indikator berubah hijau: *"cookies.txt tersimpan"*.
-   - Cara dapat `cookies.txt` → lihat bagian [Cookie membership](#-cookie-membership) di bawah.
-   - Untuk video publik, biarkan **Tanpa cookie**.
+2. **(Membership only) Set up cookies** — section **1 · Cookies**:
+   - **Cookie source → File cookies.txt (upload)** → pick the file → click **Simpan** (Save).
+   - The indicator turns green: *"cookies.txt tersimpan"* (saved).
+   - How to get `cookies.txt` → see [Membership cookies](#-membership-cookies) below.
+   - For public videos, leave it on **Tanpa cookie** (no cookie).
 
-3. **Masukkan URL** — bagian **2 · Video atau playlist**:
-   - Tempel URL video atau playlist → klik **Cek**.
-   - Muncul judul, thumbnail, durasi (atau daftar isi playlist).
+3. **Enter the URL** — section **2 · Video atau playlist**:
+   - Paste a video or playlist URL → click **Cek** (Check).
+   - Title, thumbnail, and duration appear (or the playlist contents).
 
-4. **Pilih format** — bagian **3 · Format & kualitas**:
-   - **🎬 Video + Audio** → pilih kualitas (mis. 1080p), atau
-   - **🎵 Audio saja** → pilih format (MP3/M4A/Opus/WAV).
-   - Untuk playlist: isi *Item playlist* (mis. `1-5,8`) atau kosongkan untuk semua.
+4. **Pick a format** — section **3 · Format & kualitas**:
+   - **🎬 Video + Audio** → choose a quality (e.g. 1080p), or
+   - **🎵 Audio saja** (audio only) → choose a format (MP3/M4A/Opus/WAV).
+   - For playlists: fill in *Item playlist* (e.g. `1-5,8`) or leave empty for all.
 
-5. **Download** — klik tombol **⬇ Download**, pantau progress bar.
+5. **Download** — click the **⬇ Download** button and watch the progress bar.
 
-6. **Simpan ke komputer** — setelah selesai, klik **⬇ Simpan file ke komputer**.
-   - File tersimpan dengan nama sesuai judul video.
-   - Salinan di server otomatis dihapus. **Klik sekali saja** (klik kedua akan 404 karena sudah dibersihkan).
-
----
-
-## 🍪 Cookie membership
-
-Video members-only butuh cookie dari akun yang punya membership.
-
-### Cara A — Upload cookies.txt (paling andal)
-1. Pasang ekstensi **"Get cookies.txt LOCALLY"** (Chrome/Firefox).
-2. **Buka jendela Incognito/Private**, login YouTube dengan akun member, buka video membership-nya (pastikan bisa diputar).
-3. Export `cookies.txt` lewat ekstensi **dari jendela incognito itu**.
-4. **Langsung tutup** jendela incognito tanpa browsing lagi (biar cookie tidak dirotasi/kadaluarsa).
-5. Di aplikasi: **Sumber cookie → File cookies.txt** → pilih file → **Simpan**.
-
-> 💡 **Kenapa Incognito?** YouTube merotasi cookie sesi setiap dipakai. Export dari incognito lalu langsung ditutup membuat cookie lebih stabil dan tidak cepat basi.
-
-### Cara B — Ambil langsung dari browser
-Di aplikasi: **Sumber cookie → Ambil dari browser** → pilih browser kamu.
-> Kalau muncul error `database is locked`, tutup dulu browsernya, atau pakai Cara A.
+6. **Save to computer** — when done, click **⬇ Simpan file ke komputer** (Save file to computer).
+   - The file is saved with a name matching the video title.
+   - The server copy is deleted automatically. **Click once only** (a second click returns 404 because it's already cleaned up).
 
 ---
 
-## 📁 Struktur folder
+## 🍪 Membership cookies
+
+Members-only videos require cookies from an account that has the membership.
+
+### Method A — Upload cookies.txt (most reliable)
+1. Install the **"Get cookies.txt LOCALLY"** extension (Chrome/Firefox).
+2. **Open an Incognito/Private window**, log into YouTube with the member account, and open the membership video (make sure it plays).
+3. Export `cookies.txt` via the extension **from that incognito window**.
+4. **Close the incognito window immediately** without browsing further (so the cookies aren't rotated/expired).
+5. In the app: **Cookie source → File cookies.txt** → pick the file → **Simpan**.
+
+> 💡 **Why Incognito?** YouTube rotates session cookies on every use. Exporting from incognito and closing it right away keeps the cookies stable and slower to expire.
+
+### Method B — Read directly from the browser
+In the app: **Cookie source → Ambil dari browser** (read from browser) → pick your browser.
+> If you hit a `database is locked` error, close the browser first, or use Method A.
+
+---
+
+## 📁 Project structure
 
 ```
 yt-membership/
-├── app.py                  # Backend Flask (wrapper yt-dlp)
+├── app.py                  # Flask backend (yt-dlp wrapper)
 ├── requirements.txt
-├── templates/index.html    # Halaman utama (Jinja)
+├── templates/index.html    # Main page (Jinja)
 ├── static/
 │   ├── css/style.css       # Styling (Apple-style)
-│   └── js/app.js           # Logika frontend
-├── cookies/cookies.txt     # Cookie aktif (otomatis dibuat saat upload)
-├── downloads/              # File sementara (dibersihkan setelah diunduh)
-└── pot-provider/           # Server PO Token (bgutil) untuk video membership
+│   └── js/app.js           # Frontend logic
+├── cookies/cookies.txt     # Active cookie (created on upload)
+├── downloads/              # Temporary files (cleaned up after download)
+└── pot-provider/           # PO Token server (bgutil) for membership videos
 ```
 
 ---
 
 ## 🛠️ Troubleshooting
 
-| Gejala | Penyebab & solusi |
+| Symptom | Cause & fix |
 |---|---|
-| Halaman tampil polos, muncul teks `{{ ... }}` | Kamu membuka file HTML langsung (`file://`). **Harus lewat** http://127.0.0.1:5050 (server Flask). |
-| `ModuleNotFoundError: No module named 'flask'` padahal venv aktif | Alias `python` membajak venv. Jalankan **`./venv/bin/python app.py`**, atau `unalias python` dulu. |
-| `Address already in use` / port 5000 | Port 5000 dipakai AirPlay di macOS. App ini sudah default **5050**; ganti dengan `PORT=8000 ...`. |
-| `This video is available to this channel's members...` | Cookie belum terpasang **atau sudah basi**. Export ulang cookie segar (Cara A, incognito). |
-| `Only images are available` / `Requested format is not available` | Server PO Token mati. Pastikan Terminal 1 (`node build/main.js`) hidup di port **4416**. |
-| Format video membership tidak muncul meski cookie benar | Butuh **deno** terpasang (untuk nsig solver) + server PO Token jalan. |
-| yt-dlp usang / YouTube berubah | Update: `./venv/bin/pip install -U yt-dlp` (lakukan rutin). |
+| Page renders unstyled, shows raw `{{ ... }}` text | You opened the HTML file directly (`file://`). You **must** go through http://127.0.0.1:5050 (the Flask server). |
+| `ModuleNotFoundError: No module named 'flask'` even though venv is active | A `python` alias is hijacking the venv. Run **`./venv/bin/python app.py`**, or `unalias python` first. |
+| `Address already in use` / port 5000 | Port 5000 is used by AirPlay on macOS. This app defaults to **5050**; override with `PORT=8000 ...`. |
+| `This video is available to this channel's members...` | Cookies aren't set up **or have expired**. Re-export fresh cookies (Method A, incognito). |
+| `Only images are available` / `Requested format is not available` | The PO Token server is down. Make sure Terminal 1 (`node build/main.js`) is alive on port **4416**. |
+| Membership formats don't appear even with correct cookies | You need **deno** installed (for the nsig solver) + the PO Token server running. |
+| yt-dlp outdated / YouTube changed | Update: `./venv/bin/pip install -U yt-dlp` (do this regularly). |
 
 ---
 
-## 🔒 Keamanan & privasi
+## 🔒 Security & privacy
 
-- Aplikasi **bind ke 127.0.0.1** saja — tidak bisa diakses dari luar komputermu.
-- File `cookies.txt` setara sesi login akun Google-mu — **jangan dibagikan**. Sudah masuk `.gitignore`.
-- `downloads/` dan `cookies/` tidak ikut ter-commit (lihat `.gitignore`).
+- The app **binds to 127.0.0.1** only — it can't be reached from outside your computer.
+- `cookies.txt` is equivalent to your Google account login session — **never share it**. It's already in `.gitignore`.
+- `downloads/` and `cookies/` are not committed (see `.gitignore`).
 
 ---
 
-## 🙏 Kredit
+## 🙏 Credits
 
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp) — mesin pengunduh
-- [bgutil-ytdlp-pot-provider](https://github.com/Brainicism/bgutil-ytdlp-pot-provider) — penyedia PO Token
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) — the download engine
+- [bgutil-ytdlp-pot-provider](https://github.com/Brainicism/bgutil-ytdlp-pot-provider) — PO Token provider
 - [Flask](https://flask.palletsprojects.com/) · [ffmpeg](https://ffmpeg.org/)
+
+---
+
+## 📄 License
+
+[MIT](LICENSE) © rahmatez
