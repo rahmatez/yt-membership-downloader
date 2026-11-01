@@ -6,6 +6,12 @@
 
 Pilih kualitas video, ekstrak audio, unduh playlist, pakai cookie membership. Jalan sepenuhnya di komputermu (localhost), tampilan ala Apple.
 
+![License](https://img.shields.io/badge/license-MIT-green)
+![Python](https://img.shields.io/badge/python-3.9%2B-blue)
+![Flask](https://img.shields.io/badge/Flask-3.1-000)
+![powered by yt-dlp](https://img.shields.io/badge/powered%20by-yt--dlp-red)
+![platform](https://img.shields.io/badge/platform-local%20%2F%20localhost-lightgrey)
+
 </div>
 
 > [!WARNING]
