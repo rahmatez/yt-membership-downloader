@@ -70,10 +70,11 @@ python3 -m venv venv
 
 ## 🚀 Menjalankan
 
+> Semua perintah di bawah dijalankan **dari dalam folder proyek**. Masuk dulu ke foldernya, mis. `cd ~/Developer/Project/Python/yt-membership`.
+
 ### A. Video biasa (non-membership) — cukup 1 terminal
 
 ```bash
-cd yt-membership
 ./venv/bin/python app.py
 ```
 Buka **http://127.0.0.1:5050**
@@ -82,15 +83,14 @@ Buka **http://127.0.0.1:5050**
 
 **Terminal 1 — Server PO Token** (biarkan terbuka selama dipakai):
 ```bash
-cd yt-membership/pot-provider/server
+cd pot-provider/server
 node build/main.js
 ```
 Tunggu sampai muncul: `Started POT server (v2.0.2) on ... 127.0.0.1:4416`
 ➡ Jangan ditutup. Proses ini memang tidak kembali ke prompt — itu normal.
 
-**Terminal 2 — Aplikasi Flask:**
+**Terminal 2 — Aplikasi Flask** (terminal baru, dari folder proyek):
 ```bash
-cd yt-membership
 ./venv/bin/python app.py
 ```
 Buka **http://127.0.0.1:5050**
@@ -100,9 +100,8 @@ Buka **http://127.0.0.1:5050**
 > Debugger/auto-reload mati secara default. Untuk pengembangan, aktifkan dengan `DEBUG=1 ./venv/bin/python app.py`. File sisa di `downloads/` dari run sebelumnya otomatis dibersihkan saat start.
 
 #### Setup server PO Token pertama kali (hanya sekali)
-Folder `pot-provider/` tidak ikut di repo (pihak ketiga). Clone & build dulu:
+Folder `pot-provider/` tidak ikut di repo (pihak ketiga). Dari folder proyek, clone & build dulu:
 ```bash
-cd yt-membership
 git clone --depth 1 --branch 2.0.2 \
   https://github.com/Brainicism/bgutil-ytdlp-pot-provider.git pot-provider
 cd pot-provider/server

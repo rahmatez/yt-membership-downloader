@@ -70,10 +70,11 @@ python3 -m venv venv
 
 ## 🚀 Running
 
+> All commands below run **from inside the project folder**. Open a terminal and `cd` into it first, e.g. `cd ~/Developer/Project/Python/yt-membership`.
+
 ### A. Regular (non-membership) videos — just 1 terminal
 
 ```bash
-cd yt-membership
 ./venv/bin/python app.py
 ```
 Open **http://127.0.0.1:5050**
@@ -82,15 +83,14 @@ Open **http://127.0.0.1:5050**
 
 **Terminal 1 — PO Token server** (keep it open while in use):
 ```bash
-cd yt-membership/pot-provider/server
+cd pot-provider/server
 node build/main.js
 ```
 Wait until you see: `Started POT server (v2.0.2) on ... 127.0.0.1:4416`
 ➡ Don't close it. This process intentionally doesn't return to the prompt — that's normal.
 
-**Terminal 2 — the Flask app:**
+**Terminal 2 — the Flask app** (a new terminal, from the project folder):
 ```bash
-cd yt-membership
 ./venv/bin/python app.py
 ```
 Open **http://127.0.0.1:5050**
@@ -100,9 +100,8 @@ Open **http://127.0.0.1:5050**
 > The debugger/auto-reload is off by default. For development, enable it with `DEBUG=1 ./venv/bin/python app.py`. Leftover files in `downloads/` from previous runs are cleared automatically on startup.
 
 #### First-time PO Token server setup (once)
-The `pot-provider/` folder is **not** included in the repo (third-party). Clone & build it:
+The `pot-provider/` folder is **not** included in the repo (third-party). From the project folder, clone & build it:
 ```bash
-cd yt-membership
 git clone --depth 1 --branch 2.0.2 \
   https://github.com/Brainicism/bgutil-ytdlp-pot-provider.git pot-provider
 cd pot-provider/server
