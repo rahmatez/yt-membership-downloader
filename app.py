@@ -1,7 +1,7 @@
 """
 YouTube Membership Downloader — local web UI around yt-dlp.
 
-Run:  python app.py   then open http://127.0.0.1:5000
+Run:  python app.py   then open http://127.0.0.1:5050
 
 Features:
   - Fetch available video qualities for a URL
@@ -50,6 +50,57 @@ def safe_filename(name, fallback="download"):
     name = re.sub(r'[\\/:*?"<>|\x00-\x1f]', "_", name)
     name = name.strip(". ")
     return name[:180] or fallback
+
+
+# Map noisy yt-dlp errors to short, actionable hints for the UI.
+_ERROR_HINTS = [
+    (("members on level", "members-only", "members only", "join this channel"),
+     "Video khusus member. Cookie belum terpasang atau sudah kedaluwarsa — "
+     "export ulang cookie segar (mode Incognito) lalu Simpan."),
+    (("only images are available", "requested format is not available", "forcing sabr"),
+     "Format video tidak tersedia. Server PO Token kemungkinan mati — pastikan "
+     "'node build/main.js' jalan di port 4416, lalu coba lagi."),
+    (("sign in to confirm", "not a bot", "confirm you're not a bot"),
+     "YouTube minta verifikasi login. Pasang cookie segar dari akunmu (mode Incognito)."),
+    (("nsig", "n challenge", "challenge solving", "ejs", "javascript runtime"),
+     "Butuh runtime JS 'deno' untuk memecahkan proteksi YouTube. Install deno lalu ulangi."),
+    (("http error 429", "too many requests"),
+     "Terlalu banyak permintaan (rate limit YouTube). Tunggu beberapa menit lalu coba lagi."),
+    (("private video",),
+     "Video ini privat — tidak bisa diunduh."),
+    (("video unavailable", "this video is unavailable", "has been removed"),
+     "Video tidak tersedia atau sudah dihapus."),
+    (("is not a valid url", "unsupported url"),
+     "URL tidak valid. Pastikan ini tautan YouTube yang benar."),
+]
+
+
+def friendly_error(raw):
+    """Translate a raw yt-dlp error into a short, human-friendly message."""
+    msg = str(raw or "")
+    low = msg.lower()
+    for keys, hint in _ERROR_HINTS:
+        if any(k in low for k in keys):
+            return hint
+    cleaned = re.sub(r"^ERROR:\s*", "", msg).strip()
+    return cleaned[:300] or "Terjadi kesalahan tak terduga."
+
+
+def cleanup_downloads():
+    """Remove leftover files/folders from previous runs.
+
+    Served files are deleted on download; anything left in downloads/ at startup
+    is an orphan (a download that was never saved, now unreachable because its
+    in-memory job is gone), so it is safe to clear.
+    """
+    removed = 0
+    for p in DOWNLOAD_DIR.iterdir():
+        try:
+            shutil.rmtree(p, ignore_errors=True) if p.is_dir() else p.unlink()
+            removed += 1
+        except OSError:
+            pass
+    return removed
 
 
 def base_ydl_opts():
@@ -146,9 +197,9 @@ def info():
         with yt_dlp.YoutubeDL(flat_opts) as ydl:
             flat = ydl.extract_info(url, download=False)
     except yt_dlp.utils.DownloadError as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": friendly_error(e)}), 400
     except Exception as e:  # noqa: BLE001
-        return jsonify({"error": f"Unexpected error: {e}"}), 500
+        return jsonify({"error": friendly_error(e)}), 500
 
     is_playlist = flat.get("_type") == "playlist" or bool(flat.get("entries"))
 
@@ -182,9 +233,9 @@ def info():
         with yt_dlp.YoutubeDL(full_opts) as ydl:
             meta = ydl.extract_info(url, download=False)
     except yt_dlp.utils.DownloadError as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": friendly_error(e)}), 400
     except Exception as e:  # noqa: BLE001
-        return jsonify({"error": f"Unexpected error: {e}"}), 500
+        return jsonify({"error": friendly_error(e)}), 500
 
     heights = set()
     has_audio = False
@@ -343,9 +394,9 @@ def _run_download(
             }
         )
     except yt_dlp.utils.DownloadError as e:
-        job.update({"status": "error", "error": str(e)})
+        job.update({"status": "error", "error": friendly_error(e)})
     except Exception as e:  # noqa: BLE001
-        job.update({"status": "error", "error": f"Unexpected error: {e}"})
+        job.update({"status": "error", "error": friendly_error(e)})
 
 
 @app.route("/api/download", methods=["POST"])
@@ -446,4 +497,14 @@ if __name__ == "__main__":
     # Local use only — bind to localhost.
     # Port 5000 is taken by AirPlay Receiver on modern macOS, so default to 5050.
     port = int(os.environ.get("PORT", 5050))
-    app.run(host="127.0.0.1", port=port, debug=True)
+    # Debugger/reloader off by default (safer); enable with DEBUG=1 for development.
+    debug = os.environ.get("DEBUG", "0") == "1"
+
+    # Clear orphan files from previous runs (only once, not in the reloader child).
+    if not debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        n = cleanup_downloads()
+        if n:
+            print(f"[cleanup] {n} file/folder sisa dibersihkan dari downloads/")
+
+    print(f" * YouTube Membership Downloader → http://127.0.0.1:{port}")
+    app.run(host="127.0.0.1", port=port, debug=debug)

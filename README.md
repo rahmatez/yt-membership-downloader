@@ -96,6 +96,8 @@ cd yt-membership
 Open **http://127.0.0.1:5050**
 
 > Default port is **5050** (not 5000) because modern macOS uses port 5000 for the AirPlay Receiver. Change it if needed: `PORT=8000 ./venv/bin/python app.py`
+>
+> The debugger/auto-reload is off by default. For development, enable it with `DEBUG=1 ./venv/bin/python app.py`. Leftover files in `downloads/` from previous runs are cleared automatically on startup.
 
 #### First-time PO Token server setup (once)
 The `pot-provider/` folder is **not** included in the repo (third-party). Clone & build it:

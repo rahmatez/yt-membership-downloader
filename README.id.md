@@ -96,6 +96,8 @@ cd yt-membership
 Buka **http://127.0.0.1:5050**
 
 > Port default **5050** (bukan 5000) karena di macOS modern port 5000 dipakai AirPlay Receiver. Ganti bila perlu: `PORT=8000 ./venv/bin/python app.py`
+>
+> Debugger/auto-reload mati secara default. Untuk pengembangan, aktifkan dengan `DEBUG=1 ./venv/bin/python app.py`. File sisa di `downloads/` dari run sebelumnya otomatis dibersihkan saat start.
 
 #### Setup server PO Token pertama kali (hanya sekali)
 Folder `pot-provider/` tidak ikut di repo (pihak ketiga). Clone & build dulu:
