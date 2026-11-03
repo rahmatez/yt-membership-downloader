@@ -75,6 +75,72 @@ function cookiePayload() {
   };
 }
 
+/* ---------- provider status ---------- */
+async function refreshProvider() {
+  const el = $("providerStatus");
+  if (!el) return;
+  try {
+    const r = await fetch("/api/provider");
+    const j = await r.json();
+    const dot = el.querySelector(".dot");
+    const txt = el.querySelector("span:last-child");
+    if (j.running) {
+      dot.className = "dot on";
+      txt.textContent = `Server PO Token aktif (port ${j.port})`;
+    } else {
+      dot.className = "dot warn";
+      txt.textContent = `Server PO Token mati — perlu untuk video membership`;
+    }
+  } catch (e) { /* ignore */ }
+}
+refreshProvider();
+setInterval(refreshProvider, 15000);
+
+/* ---------- test cookie ---------- */
+$("testCookieBtn").addEventListener("click", async () => {
+  const btn = $("testCookieBtn");
+  btn.disabled = true;
+  msg($("cookieTestMsg"), '<span class="spinner"></span>Mengecek cookie…', "ok");
+  try {
+    const r = await fetch("/api/cookies/test");
+    const j = await r.json();
+    msg($("cookieTestMsg"), j.message, j.ok ? "ok" : "err");
+  } catch (e) {
+    msg($("cookieTestMsg"), "Gagal cek: " + e, "err");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+/* ---------- subtitle toggle ---------- */
+$("subsToggle").addEventListener("change", (e) => {
+  $("subLangs").classList.toggle("hidden", !e.target.checked);
+});
+
+/* ---------- history ---------- */
+function fmtDate(iso) {
+  try { return new Date(iso).toLocaleString(); } catch (e) { return iso; }
+}
+async function loadHistory() {
+  try {
+    const r = await fetch("/api/history");
+    const j = await r.json();
+    const items = j.items || [];
+    if (!items.length) { $("historyList").textContent = "Belum ada riwayat."; return; }
+    $("historyList").innerHTML = items.map(it => `
+      <div class="hist-item">
+        <span class="h-title" title="${(it.title || '').replace(/"/g, '&quot;')}">${it.title || "(tanpa judul)"}</span>
+        <span class="h-meta">${it.type || ""} · ${it.size ? fmtBytes(it.size) : "?"} · ${fmtDate(it.date)}</span>
+      </div>`).join("");
+  } catch (e) { $("historyList").textContent = "Gagal memuat riwayat."; }
+}
+$("clearHistoryBtn").addEventListener("click", async () => {
+  if (!confirm("Hapus semua riwayat?")) return;
+  await fetch("/api/history", { method: "DELETE" });
+  loadHistory();
+});
+loadHistory();
+
 /* ---------- fetch info ---------- */
 $("fetchBtn").addEventListener("click", fetchInfo);
 $("url").addEventListener("keydown", (e) => { if (e.key === "Enter") fetchInfo(); });
@@ -157,6 +223,8 @@ $("downloadBtn").addEventListener("click", async () => {
     audio_format: $("audioFormat").value,
     is_playlist: isPlaylist,
     playlist_items: isPlaylist ? $("playlistItems").value.trim() : null,
+    subs: mode === "video" && $("subsToggle").checked,
+    sub_langs: $("subLangs").value.trim(),
     ...cookiePayload(),
   };
   try {
@@ -208,6 +276,7 @@ function poll(jobId) {
            <a class="dl" href="/api/file/${jobId}">${label}</a>
            <div class="hint" style="margin-top:6px;">Salinan di server otomatis dihapus setelah selesai diunduh (klik sekali).</div></div>`;
         $("downloadBtn").disabled = false;
+        loadHistory();
       } else if (j.status === "error") {
         clearInterval(pollTimer);
         $("progText").textContent = "";

@@ -8,6 +8,7 @@ downloads/
 cookies/
 cookies.txt
 *_cookies.txt
+history.json
 
 # Server PO Token pihak ketiga (clone & build terpisah — lihat README)
 pot-provider/

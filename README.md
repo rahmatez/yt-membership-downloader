@@ -27,7 +27,10 @@ Pick video quality, extract audio, download playlists, use membership cookies. R
 - 🎬 **Choose video quality** — Best / 2160p (4K) / 1440p / 1080p / 720p / 480p / 360p.
 - 🎵 **Audio only** — MP3 / M4A / Opus / WAV.
 - 📃 **Playlist** — auto-detected, pick specific items (e.g. `1-5,8`) or all; the result is bundled into a single `.zip`.
-- 🍪 **Membership cookies** — upload a `cookies.txt` (Netscape format) or read them straight from your browser.
+- 💬 **Subtitles** — optionally download manual + auto subtitles for chosen languages and embed them into the mp4.
+- 🍪 **Membership cookies** — upload a `cookies.txt` (Netscape format) or read them straight from your browser, with a one-click **cookie test**.
+- 🟢 **PO Token server status** — a live indicator shows whether the membership provider is up.
+- 🗂️ **Download history** — a running list of what you've downloaded.
 - 📊 **Real-time progress** + output filename **matches the video title**.
 - 🧹 **Auto-cleanup** — the server copy is deleted automatically once the file finishes downloading to your computer (no duplicates).
 - 🌗 **Modern UI** — frosted glass, automatic dark mode, responsive.
@@ -71,6 +74,13 @@ python3 -m venv venv
 ## 🚀 Running
 
 > All commands below run **from inside the project folder**. Open a terminal and `cd` into it first, e.g. `cd ~/Developer/Project/Python/yt-membership`.
+
+### ⚡ One-click (macOS/Linux)
+
+```bash
+./start.sh
+```
+Starts the PO Token server (if built) **and** the Flask app, and stops the provider on Ctrl+C. Then open **http://127.0.0.1:5050**. Prefer separate terminals? Use the manual steps below.
 
 ### A. Regular (non-membership) videos — just 1 terminal
 

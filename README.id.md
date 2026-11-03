@@ -27,7 +27,10 @@ Pilih kualitas video, ekstrak audio, unduh playlist, pakai cookie membership. Ja
 - 🎬 **Pilih kualitas video** — Terbaik / 2160p (4K) / 1440p / 1080p / 720p / 480p / 360p.
 - 🎵 **Audio saja** — MP3 / M4A / Opus / WAV.
 - 📃 **Playlist** — deteksi otomatis, pilih item tertentu (mis. `1-5,8`) atau semua; hasil dikemas jadi satu `.zip`.
-- 🍪 **Cookie membership** — upload `cookies.txt` (format Netscape) atau ambil langsung dari browser.
+- 💬 **Subtitle** — opsional unduh subtitle manual + otomatis untuk bahasa pilihan, lalu di-embed ke mp4.
+- 🍪 **Cookie membership** — upload `cookies.txt` (format Netscape) atau ambil langsung dari browser, lengkap dengan tombol **tes cookie**.
+- 🟢 **Status server PO Token** — indikator langsung apakah provider membership aktif.
+- 🗂️ **Riwayat unduhan** — daftar yang sudah pernah diunduh.
 - 📊 **Progress real-time** + nama file otomatis **sesuai judul video**.
 - 🧹 **Auto-bersih** — salinan di server dihapus otomatis setelah file selesai diunduh ke komputer (tanpa duplikat).
 - 🌗 **UI modern** — frosted glass, mode gelap otomatis, responsif.
@@ -71,6 +74,13 @@ python3 -m venv venv
 ## 🚀 Menjalankan
 
 > Semua perintah di bawah dijalankan **dari dalam folder proyek**. Masuk dulu ke foldernya, mis. `cd ~/Developer/Project/Python/yt-membership`.
+
+### ⚡ Satu klik (macOS/Linux)
+
+```bash
+./start.sh
+```
+Menjalankan server PO Token (jika sudah di-build) **dan** aplikasi Flask sekaligus, lalu mematikan provider saat Ctrl+C. Buka **http://127.0.0.1:5050**. Lebih suka 2 terminal terpisah? Pakai cara manual di bawah.
 
 ### A. Video biasa (non-membership) — cukup 1 terminal
 

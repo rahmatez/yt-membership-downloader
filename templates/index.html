@@ -19,6 +19,9 @@
     <div class="badge">▶</div>
     <h1>Membership Downloader</h1>
     <p>Unduh video YouTube & membership kamu — rapi, lokal, lewat yt-dlp.</p>
+    <div id="providerStatus" class="status-pill" title="Server PO Token untuk video membership">
+      <span class="dot off"></span><span>Mengecek server PO Token…</span>
+    </div>
   </header>
 
   <!-- 1 · Cookies -->
@@ -28,12 +31,16 @@
       <h2>Cookies untuk membership</h2>
     </div>
 
-    <div class="status-pill">
-      <span id="cookieDot" class="dot {{ 'on' if has_cookie_file else 'off' }}"></span>
-      <span id="cookieText">
-        {{ 'cookies.txt tersimpan' if has_cookie_file else 'Belum ada cookies.txt' }}
-      </span>
+    <div class="cookie-row">
+      <div class="status-pill">
+        <span id="cookieDot" class="dot {{ 'on' if has_cookie_file else 'off' }}"></span>
+        <span id="cookieText">
+          {{ 'cookies.txt tersimpan' if has_cookie_file else 'Belum ada cookies.txt' }}
+        </span>
+      </div>
+      <button class="ghost small" id="testCookieBtn" type="button">Tes cookie</button>
     </div>
+    <div id="cookieTestMsg"></div>
 
     <div class="field">
       <label>Sumber cookie</label>
@@ -103,6 +110,12 @@
       <select id="height">
         <option value="best">Terbaik yang tersedia</option>
       </select>
+      <label class="check" style="margin-top:14px;">
+        <input type="checkbox" id="subsToggle" /> Sertakan subtitle (embed ke video)
+      </label>
+      <input type="text" id="subLangs" class="hidden" value="id,en"
+             placeholder="bahasa subtitle, mis: id,en" style="margin-top:8px;" />
+      <p class="hint">Mengunduh subtitle manual & otomatis untuk bahasa tsb, lalu di-embed ke mp4.</p>
     </div>
 
     <div id="playlistOpts" class="field hidden">
@@ -130,6 +143,16 @@
       <div class="bar"><div id="progFill"></div></div>
       <div id="result"></div>
     </div>
+  </section>
+
+  <!-- Riwayat -->
+  <section class="card reveal">
+    <div class="card-head">
+      <span class="step">⏱</span>
+      <h2>Riwayat unduhan</h2>
+      <button class="ghost small" id="clearHistoryBtn" type="button" style="margin-left:auto;">Hapus</button>
+    </div>
+    <div id="historyList" class="hint">Memuat…</div>
   </section>
 
   <p class="footnote">

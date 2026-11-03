@@ -2,3 +2,7 @@
 # flask / yt_dlp resolve from venv/ instead of the system Python.
 python-interpreter = "venv/bin/python"
 search-path = ["."]
+
+# yt-dlp is a large, dynamically-typed library whose option dicts don't match
+# its own strict stubs; treat it as untyped to avoid false-positive errors.
+replace-imports-with-any = ["yt_dlp", "yt_dlp.*"]

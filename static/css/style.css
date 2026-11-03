@@ -290,6 +290,19 @@ button.ghost:hover { background: rgba(120, 120, 128, 0.22); }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* --- New controls (provider status, cookie test, subtitle, history) --- */
+.hero .status-pill { margin: 14px auto 0; }
+.cookie-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.cookie-row .status-pill { margin-bottom: 0; }
+button.small { padding: 7px 14px; font-size: 0.85rem; }
+.dot.warn { background: #ff9f0a; box-shadow: 0 0 0 4px rgba(255,159,10,.2); }
+.check { display: flex; align-items: center; gap: 9px; font-size: 0.9rem; color: var(--text); cursor: pointer; }
+.check input { width: 17px; height: 17px; accent-color: var(--accent); }
+.hist-item { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--hairline); font-size: 0.86rem; }
+.hist-item:last-child { border-bottom: none; }
+.hist-item .h-title { color: var(--text); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hist-item .h-meta { color: var(--text-3); white-space: nowrap; flex-shrink: 0; }
+
 /* --- Utility & transitions --- */
 .hidden { display: none !important; }
 .footnote {

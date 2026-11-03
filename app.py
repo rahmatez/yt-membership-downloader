@@ -12,11 +12,15 @@ Features:
 
 import os
 import re
+import json
 import uuid
 import shutil
+import socket
 import mimetypes
 import threading
+from typing import Any
 from pathlib import Path
+from datetime import datetime
 from urllib.parse import quote
 
 from flask import (
@@ -36,6 +40,17 @@ DOWNLOAD_DIR.mkdir(exist_ok=True)
 COOKIE_DIR.mkdir(exist_ok=True)
 
 COOKIE_FILE = COOKIE_DIR / "cookies.txt"
+HISTORY_FILE = BASE_DIR / "history.json"
+
+# Port the bgutil PO Token provider listens on.
+POT_PORT = int(os.environ.get("POT_PORT", 4416))
+
+# Cookie names that indicate a logged-in YouTube/Google session.
+LOGIN_COOKIE_NAMES = {
+    "SID", "HSID", "SSID", "SAPISID", "LOGIN_INFO",
+    "__Secure-1PSID", "__Secure-3PSID",
+    "__Secure-1PSIDTS", "__Secure-3PSIDTS",
+}
 
 # YouTube now forces an "nsig" JS challenge; yt-dlp must run a challenge solver
 # (EJS, fetched from GitHub and executed via a JS runtime like deno/node) or most
@@ -103,7 +118,80 @@ def cleanup_downloads():
     return removed
 
 
-def base_ydl_opts():
+def provider_running():
+    """True if the PO Token provider is reachable on localhost:POT_PORT."""
+    try:
+        with socket.create_connection(("127.0.0.1", POT_PORT), timeout=0.5):
+            return True
+    except OSError:
+        return False
+
+
+def inspect_cookies():
+    """Offline sanity check of the stored cookies.txt (no network call)."""
+    if not COOKIE_FILE.exists():
+        return {"ok": False, "message": "Belum ada cookies.txt. Upload dulu."}
+    try:
+        txt = COOKIE_FILE.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return {"ok": False, "message": "Gagal membaca cookies.txt."}
+
+    found, soonest = set(), None
+    for line in txt.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split("\t")
+        if len(parts) < 7:
+            continue
+        domain, expiry, name = parts[0], parts[4], parts[5]
+        if ("youtube.com" in domain or "google.com" in domain) and name in LOGIN_COOKIE_NAMES:
+            found.add(name)
+            try:
+                exp = int(expiry)
+                if exp > 0 and (soonest is None or exp < soonest):
+                    soonest = exp
+            except ValueError:
+                pass
+
+    if not found:
+        return {"ok": False, "message": "Cookie tidak berisi sesi login YouTube "
+                "(anonim). Login dulu lalu export ulang."}
+
+    now = datetime.now().timestamp()
+    if soonest and soonest < now:
+        return {"ok": False, "message": "Cookie login ada tapi sudah kedaluwarsa. "
+                "Export ulang cookie segar (mode Incognito)."}
+
+    note = f"Cookie login terdeteksi ({len(found)} item)."
+    if soonest:
+        days = int((soonest - now) / 86400)
+        note += f" Masa berlaku termuda ~{days} hari lagi." if days > 0 else \
+                " Hampir kedaluwarsa — sebaiknya export ulang."
+    return {"ok": True, "message": note + " Catatan: cek ini offline, "
+            "validitas final tetap tergantung YouTube."}
+
+
+def load_history():
+    try:
+        return json.loads(HISTORY_FILE.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+
+
+def add_history(entry):
+    """Append a completed download to history.json (most recent kept, max 100)."""
+    hist = load_history()
+    hist.insert(0, entry)
+    hist = hist[:100]
+    try:
+        HISTORY_FILE.write_text(json.dumps(hist, ensure_ascii=False, indent=2),
+                                encoding="utf-8")
+    except OSError:
+        pass
+
+
+def base_ydl_opts() -> dict[str, Any]:
     """Common yt-dlp options shared by info and download calls."""
     return {
         "quiet": True,
@@ -132,7 +220,7 @@ SUPPORTED_BROWSERS = [
 
 def build_cookie_opts(cookie_source, browser):
     """Return yt-dlp options for cookies based on the chosen source."""
-    opts = {}
+    opts: dict[str, Any] = {}
     if cookie_source == "file" and COOKIE_FILE.exists():
         opts["cookiefile"] = str(COOKIE_FILE)
     elif cookie_source == "browser" and browser in SUPPORTED_BROWSERS:
@@ -171,6 +259,32 @@ def upload_cookies():
 def delete_cookies():
     if COOKIE_FILE.exists():
         COOKIE_FILE.unlink()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/cookies/test")
+def test_cookies():
+    """Quick offline check that the stored cookie holds a login session."""
+    return jsonify(inspect_cookies())
+
+
+@app.route("/api/provider")
+def provider_status():
+    """Report whether the PO Token provider is up (for membership videos)."""
+    return jsonify({"running": provider_running(), "port": POT_PORT})
+
+
+@app.route("/api/history")
+def history():
+    return jsonify({"items": load_history()})
+
+
+@app.route("/api/history", methods=["DELETE"])
+def clear_history():
+    try:
+        HISTORY_FILE.unlink(missing_ok=True)
+    except OSError:
+        pass
     return jsonify({"ok": True})
 
 
@@ -294,7 +408,7 @@ def _progress_hook(job_id):
 
 def _run_download(
     job_id, url, mode, height, audio_format, cookie_opts,
-    is_playlist=False, playlist_items=None,
+    is_playlist=False, playlist_items=None, subs=False, sub_langs="id,en",
 ):
     job = JOBS[job_id]
 
@@ -307,6 +421,19 @@ def _run_download(
         "ignoreerrors": is_playlist,  # keep going if one entry fails
     })
     ydl_opts.update(cookie_opts)
+
+    # Subtitles (video mode only) — download + embed into the mp4.
+    if subs and mode == "video":
+        langs = [s.strip() for s in (sub_langs or "").split(",") if s.strip()] or ["id", "en"]
+        ydl_opts.update({
+            "writesubtitles": True,
+            "writeautomaticsub": True,
+            "subtitleslangs": langs,
+            # Video mode has no other postprocessors, so set directly.
+            "postprocessors": [
+                {"key": "FFmpegEmbedSubtitle", "already_have_subtitle": False}
+            ],
+        })
 
     if is_playlist:
         # Each playlist goes into its own folder, later zipped for download.
@@ -357,6 +484,7 @@ def _run_download(
             job.update({"status": "processing", "percent": 100})
             zip_base = DOWNLOAD_DIR / job_id
             shutil.make_archive(str(zip_base), "zip", str(folder))
+            zip_size = (DOWNLOAD_DIR / f"{job_id}.zip").stat().st_size
             job.update(
                 {
                     "status": "done",
@@ -367,6 +495,12 @@ def _run_download(
                     "file_count": len(files),
                 }
             )
+            add_history({
+                "title": meta.get("title") or "Playlist",
+                "type": f"playlist ({len(files)} video, .zip)",
+                "size": zip_size,
+                "date": datetime.now().isoformat(timespec="seconds"),
+            })
             return
 
         # Single video: resolve the final filename (after any postprocessing).
@@ -393,6 +527,13 @@ def _run_download(
                 "title": meta.get("title"),
             }
         )
+        add_history({
+            "title": meta.get("title") or "(tanpa judul)",
+            "type": ("audio " + (audio_format or "mp3")) if mode == "audio"
+                    else f"video {height}p" if height else "video",
+            "size": final.stat().st_size if final.exists() else None,
+            "date": datetime.now().isoformat(timespec="seconds"),
+        })
     except yt_dlp.utils.DownloadError as e:
         job.update({"status": "error", "error": friendly_error(e)})
     except Exception as e:  # noqa: BLE001
@@ -411,6 +552,8 @@ def download():
     audio_format = data.get("audio_format", "mp3")
     is_playlist = bool(data.get("is_playlist"))
     playlist_items = (data.get("playlist_items") or "").strip() or None
+    subs = bool(data.get("subs"))
+    sub_langs = (data.get("sub_langs") or "id,en").strip() or "id,en"
     cookie_opts = build_cookie_opts(data.get("cookie_source"), data.get("browser"))
 
     if height in ("", "best", None):
@@ -427,7 +570,12 @@ def download():
     t = threading.Thread(
         target=_run_download,
         args=(job_id, url, mode, height, audio_format, cookie_opts),
-        kwargs={"is_playlist": is_playlist, "playlist_items": playlist_items},
+        kwargs={
+            "is_playlist": is_playlist,
+            "playlist_items": playlist_items,
+            "subs": subs,
+            "sub_langs": sub_langs,
+        },
         daemon=True,
     )
     t.start()
