@@ -269,12 +269,15 @@ function poll(jobId) {
         clearInterval(pollTimer);
         $("progFill").style.width = "100%";
         $("progText").textContent = "Selesai ✓";
-        const extra = j.file_count ? ` (${j.file_count} video, .zip)` : "";
+        const extra = j.file_count
+          ? ` (${j.file_count}${j.requested ? "/" + j.requested : ""} video, .zip)` : "";
         const label = isPlaylist ? "⬇ Simpan playlist (.zip)" : "⬇ Simpan file ke komputer";
+        const warn = j.warning
+          ? `<div class="msg err reveal" style="margin-top:10px;">⚠ ${j.warning}</div>` : "";
         $("result").innerHTML =
           `<div class="msg ok reveal">Berhasil: ${j.title || ""}${extra}<br>
            <a class="dl" href="/api/file/${jobId}">${label}</a>
-           <div class="hint" style="margin-top:6px;">Salinan di server otomatis dihapus setelah selesai diunduh (klik sekali).</div></div>`;
+           <div class="hint" style="margin-top:6px;">Salinan di server otomatis dihapus setelah selesai diunduh (klik sekali).</div></div>${warn}`;
         $("downloadBtn").disabled = false;
         loadHistory();
       } else if (j.status === "error") {

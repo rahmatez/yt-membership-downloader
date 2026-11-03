@@ -1,4 +1,5 @@
 Flask==3.1.0
-yt-dlp>=2025.1.1
+# YouTube sering berubah — update rutin:  ./venv/bin/pip install -U yt-dlp
+yt-dlp>=2026.10.26
 # Penyedia PO Token untuk video membership/SABR (butuh server bgutil + deno).
 bgutil-ytdlp-pot-provider>=2.0.0

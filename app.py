@@ -13,6 +13,7 @@ Features:
 import os
 import re
 import json
+import time
 import uuid
 import shutil
 import socket
@@ -204,6 +205,19 @@ app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB cap for cookie uplo
 
 # job_id -> progress dict
 JOBS = {}
+
+
+def prune_jobs(max_age=3600):
+    """Drop finished/errored jobs older than max_age seconds so JOBS doesn't grow.
+
+    (Served downloads are already removed in get_file; this clears jobs that
+    errored or were never saved.)
+    """
+    now = time.time()
+    for jid in list(JOBS):
+        j = JOBS.get(jid) or {}
+        if j.get("status") in ("done", "error") and now - j.get("created", now) > max_age:
+            JOBS.pop(jid, None)
 
 # Browsers yt-dlp can read cookies from directly.
 SUPPORTED_BROWSERS = [
@@ -475,16 +489,28 @@ def _run_download(
         if is_playlist:
             folder = DOWNLOAD_DIR / job_id
             files = [p for p in folder.glob("*") if p.is_file()]
+            # How many entries yt-dlp actually attempted (subset if items given).
+            entries = list(meta.get("entries") or [])
+            requested = len(entries) if entries else len(files)
             if not files:
-                job.update(
-                    {"status": "error", "error": "No files were downloaded."}
-                )
+                job.update({
+                    "status": "error",
+                    "error": f"Tidak ada video yang berhasil diunduh dari {requested} item. "
+                             "Kemungkinan semua members-only (cookie basi) atau privat/dihapus.",
+                })
                 return
             # Bundle the whole playlist into a single zip for download.
             job.update({"status": "processing", "percent": 100})
             zip_base = DOWNLOAD_DIR / job_id
             shutil.make_archive(str(zip_base), "zip", str(folder))
             zip_size = (DOWNLOAD_DIR / f"{job_id}.zip").stat().st_size
+
+            warning = None
+            if requested and len(files) < requested:
+                failed = requested - len(files)
+                warning = (f"{len(files)} dari {requested} video berhasil. "
+                           f"{failed} gagal/dilewati — kemungkinan members-only "
+                           f"(cookie kedaluwarsa) atau video privat/dihapus.")
             job.update(
                 {
                     "status": "done",
@@ -493,11 +519,13 @@ def _run_download(
                     "download_name": safe_filename(meta.get("title"), "playlist") + ".zip",
                     "title": meta.get("title") or "Playlist",
                     "file_count": len(files),
+                    "requested": requested,
+                    "warning": warning,
                 }
             )
             add_history({
                 "title": meta.get("title") or "Playlist",
-                "type": f"playlist ({len(files)} video, .zip)",
+                "type": f"playlist ({len(files)}/{requested} video, .zip)",
                 "size": zip_size,
                 "date": datetime.now().isoformat(timespec="seconds"),
             })
@@ -564,8 +592,12 @@ def download():
         except (TypeError, ValueError):
             height = None
 
+    prune_jobs()
     job_id = uuid.uuid4().hex
-    JOBS[job_id] = {"status": "starting", "percent": 0, "is_playlist": is_playlist}
+    JOBS[job_id] = {
+        "status": "starting", "percent": 0,
+        "is_playlist": is_playlist, "created": time.time(),
+    }
 
     t = threading.Thread(
         target=_run_download,
