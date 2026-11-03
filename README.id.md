@@ -14,6 +14,10 @@ Pilih kualitas video, ekstrak audio, unduh playlist, pakai cookie membership. Ja
 
 [English](README.md) · **Bahasa Indonesia**
 
+<br>
+
+<img src="docs/screenshot.png" alt="YouTube Membership Downloader — pratinjau UI" width="420">
+
 </div>
 
 > [!WARNING]

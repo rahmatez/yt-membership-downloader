@@ -14,6 +14,10 @@ Pick video quality, extract audio, download playlists, use membership cookies. R
 
 **English** · [Bahasa Indonesia](README.id.md)
 
+<br>
+
+<img src="docs/screenshot.png" alt="YouTube Membership Downloader — UI preview" width="420">
+
 </div>
 
 > [!WARNING]
